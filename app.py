@@ -10,6 +10,9 @@ from __future__ import annotations
 
 import logging
 import os
+import subprocess
+import sys
+from pathlib import Path
 
 import dash
 import dash_bootstrap_components as dbc
@@ -30,26 +33,51 @@ GOOGLE_FONT = (
 )
 
 
-def _chromium_available() -> bool:
-    """Quick precheck so the failure mode is fast and the log message is clear."""
+def _chromium_path() -> Path | None:
+    """Return the path Playwright expects the Chromium binary at, or None."""
     try:
-        from pathlib import Path
-
         from playwright.sync_api import sync_playwright
         with sync_playwright() as p:
-            exe = Path(p.chromium.executable_path)
+            return Path(p.chromium.executable_path)
     except Exception:
-        log.warning("Playwright not importable; skipping startup scrape")
-        return False
-    if not exe.exists():
-        log.warning(
-            "Chromium binary missing at %s — skipping startup scrape. "
-            "On Render, set Build Command to "
-            "'pip install -r requirements.txt && python -m playwright install chromium'.",
-            exe,
+        log.exception("Playwright is not importable")
+        return None
+
+
+def _install_chromium() -> bool:
+    """Run `playwright install chromium` inline. Return True on success."""
+    log.info("Chromium binary missing — installing via "
+             "'python -m playwright install chromium' (one-time, ~30s)…")
+    try:
+        proc = subprocess.run(
+            [sys.executable, "-m", "playwright", "install", "chromium"],
+            capture_output=True, text=True, timeout=300, check=False,
         )
+    except subprocess.TimeoutExpired:
+        log.error("'playwright install chromium' timed out after 5 minutes")
         return False
+    except Exception:
+        log.exception("Failed to spawn 'playwright install chromium'")
+        return False
+    if proc.returncode != 0:
+        log.error("'playwright install chromium' exited %d:\n%s",
+                  proc.returncode, (proc.stderr or proc.stdout).strip())
+        return False
+    log.info("Chromium installed successfully")
     return True
+
+
+def _ensure_chromium() -> bool:
+    """Make sure Chromium is available, downloading it once if needed."""
+    exe = _chromium_path()
+    if exe is None:
+        return False
+    if exe.exists():
+        return True
+    if not _install_chromium():
+        return False
+    exe = _chromium_path()
+    return bool(exe and exe.exists())
 
 
 def _scrape_at_startup() -> None:
@@ -57,7 +85,8 @@ def _scrape_at_startup() -> None:
     if os.environ.get("SCRAPE_ON_STARTUP", "1") != "1":
         log.info("Startup scrape disabled (SCRAPE_ON_STARTUP=0)")
         return
-    if not _chromium_available():
+    if not _ensure_chromium():
+        log.warning("Chromium unavailable; serving with existing CSVs")
         return
     try:
         from scrape_team_stats import scrape

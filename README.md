@@ -65,23 +65,19 @@ installed) the app falls back to the CSVs on disk and still serves.
 
 1. Push the repo to GitHub.
 2. Create a new **Web Service** in Render and point it at the repo.
-3. In **Settings → Build & Deploy**, set the **Build Command** to:
-
-   ```
-   pip install -r requirements.txt && python -m playwright install chromium
-   ```
-
-   Render's native Python runtime doesn't ship Chromium, so this step
-   downloads the headless-shell binary into `/opt/render/.cache/ms-playwright/`.
+3. Use Render's default **Build Command** (`pip install -r requirements.txt`).
+   The app is **self-healing**: if Chromium is missing at startup it runs
+   `python -m playwright install chromium` inline before the first scrape
+   (one-time, ~30s; the binary is cached under `/opt/render/.cache/`).
 4. Set the **Start Command** to:
 
    ```
    gunicorn app:server --workers 1 --threads 4 --bind 0.0.0.0:$PORT --timeout 120
    ```
 
-If the build can't install Chromium for any reason (e.g. you're on a plan
-that blocks the cache), set the env var `SCRAPE_ON_STARTUP=0` and scrape
-locally before each deploy:
+If you'd rather have a fast cold-start and not scrape on the server at all,
+set the env var `SCRAPE_ON_STARTUP=0` and refresh data locally before each
+deploy:
 
 ```bash
 python scrape_team_stats.py
