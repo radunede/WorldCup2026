@@ -1,0 +1,359 @@
+/* World Cup 2026 Edge — Google / Material light theme */
+
+:root {
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --grid: #e8eaed;
+  --border: #dadce0;
+  --text: #202124;
+  --muted: #5f6368;
+  --primary: #1a73e8;
+  --primary-dark: #1967d2;
+  --primary-light: #4285f4;
+  --good: #188038;
+  --warn: #d93025;
+  --neon: #fbbc04;
+  --shadow-1: 0 1px 2px 0 rgba(60, 64, 67, 0.30), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+  --shadow-2: 0 1px 3px 0 rgba(60, 64, 67, 0.30), 0 4px 8px 3px rgba(60, 64, 67, 0.15);
+  --radius: 8px;
+}
+
+html, body {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  font-family: "Roboto", system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-shell {
+  padding: 20px 28px 32px 28px;
+  max-width: 1700px;
+}
+
+/* ---------- Header ---------- */
+
+.header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.brand-eyebrow {
+  letter-spacing: 0.25em;
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.brand-title {
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--text);
+  margin: 2px 0;
+  letter-spacing: -0.01em;
+}
+
+.brand-subtitle {
+  font-size: 12px;
+  color: var(--primary);
+  letter-spacing: 0.04em;
+}
+
+.dropdown-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.dropdown-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.team-dropdown {
+  min-width: 280px;
+}
+
+.team-dropdown .Select-control {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  color: var(--text) !important;
+  box-shadow: var(--shadow-1) !important;
+}
+.team-dropdown .Select-control:hover {
+  border-color: var(--primary) !important;
+}
+.team-dropdown .Select-menu-outer {
+  background-color: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow-2) !important;
+  color: var(--text) !important;
+}
+.team-dropdown .Select-value-label,
+.team-dropdown .Select-placeholder,
+.team-dropdown .Select-input > input {
+  color: var(--text) !important;
+}
+.team-dropdown .Select-option.is-focused {
+  background-color: rgba(26, 115, 232, 0.08) !important;
+  color: var(--text) !important;
+}
+
+/* ---------- KPI cards ---------- */
+
+.kpi-row {
+  margin-bottom: 16px;
+}
+
+.kpi-card {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: var(--shadow-1);
+  transition: box-shadow 0.15s ease;
+}
+.kpi-card:hover {
+  box-shadow: var(--shadow-2);
+}
+.kpi-card .card-body {
+  padding: 14px 16px;
+}
+.kpi-label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+.kpi-value {
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--text);
+  margin-top: 4px;
+  letter-spacing: -0.02em;
+}
+
+/* ---------- Chart cards ----------
+   Container owns the height (clamped to viewport so the 2x2 grid fits
+   on a small laptop). Plotly fills the available space below the banner
+   at 100%/100% so resizing the window scales the chart cleanly. */
+
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  height: clamp(360px, 44vh, 520px);
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-graph {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.chart-graph .js-plotly-plot,
+.chart-graph .plot-container,
+.chart-graph .svg-container {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ---------- Banner header inside each chart card ---------- */
+
+.chart-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  background: linear-gradient(90deg,
+    rgba(26,115,232,0.06) 0%,
+    rgba(255,255,255,0) 70%);
+}
+
+.chart-num {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: #ffffff;
+  background: var(--primary);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  font-family: "Roboto", system-ui, sans-serif;
+}
+
+.chart-meta { flex: 1; min-width: 0; }
+
+.chart-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.005em;
+  line-height: 1.25;
+}
+
+.chart-desc {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+  line-height: 1.35;
+}
+
+/* Per-chart accent colors (Google logo palette) */
+
+.accent-blue.chart-banner   { border-left-color: #1a73e8;
+                              background: linear-gradient(90deg, rgba(26,115,232,0.08), transparent 70%); }
+.accent-green.chart-banner  { border-left-color: #188038;
+                              background: linear-gradient(90deg, rgba(24,128,56,0.08), transparent 70%); }
+.accent-yellow.chart-banner { border-left-color: #fbbc04;
+                              background: linear-gradient(90deg, rgba(251,188,4,0.12), transparent 70%); }
+.accent-red.chart-banner    { border-left-color: #ea4335;
+                              background: linear-gradient(90deg, rgba(234,67,53,0.08), transparent 70%); }
+
+.chart-num.accent-blue   { background: #1a73e8; }
+.chart-num.accent-green  { background: #188038; }
+.chart-num.accent-yellow { background: #fbbc04; color: #5f4400; }
+.chart-num.accent-red    { background: #ea4335; }
+
+/* ---------- Responsive heights ---------- */
+
+@media (max-width: 1200px) {
+  .chart-card { height: clamp(340px, 42vh, 460px); }
+}
+@media (max-width: 992px) {
+  .chart-card { height: 380px; }
+  .read-panel { margin-top: 12px; position: static !important; }
+}
+@media (max-width: 768px) {
+  .app-shell { padding: 12px 14px 24px 14px; }
+  .chart-card { height: 360px; }
+  .chart-title { font-size: 12px; }
+  .chart-desc  { font-size: 10px; }
+  .brand-title { font-size: 20px; }
+  .kpi-value   { font-size: 20px; }
+  .header-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .dropdown-wrap { align-items: flex-start; }
+  .team-dropdown { min-width: 100%; }
+}
+
+/* ---------- Betting Read panel ---------- */
+
+.content-row {
+  align-items: stretch;
+}
+
+.read-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  padding: 20px;
+  height: 100%;
+}
+
+.panel-eyebrow {
+  letter-spacing: 0.3em;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.panel-team {
+  font-size: 22px;
+  margin: 4px 0 10px 0;
+  color: var(--text);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.panel-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  background: rgba(26, 115, 232, 0.10);
+  color: var(--primary);
+}
+
+.tag-buy      { background: rgba(24,128,56,0.12);  color: var(--good); }
+.tag-clinical { background: rgba(26,115,232,0.12); color: var(--primary); }
+.tag-watch    { background: rgba(251,188,4,0.18);  color: #b06000; }
+.tag-chaos    { background: rgba(251,188,4,0.22);  color: #b06000; }
+.tag-trap     { background: rgba(217,48,37,0.10);  color: var(--warn); }
+.tag-fade     { background: rgba(217,48,37,0.12);  color: var(--warn); }
+.tag-wasteful { background: rgba(217,48,37,0.08);  color: var(--warn); }
+
+.panel-divider {
+  border-color: var(--border);
+  margin: 14px 0;
+}
+
+.panel-row {
+  margin-bottom: 12px;
+}
+
+.panel-key {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.panel-val {
+  font-size: 13px;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+.panel-disclaimer {
+  font-size: 10px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ---------- Regression interpretation card ---------- */
+
+.interp-card {
+  margin-top: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  padding: 12px 18px;
+  font-size: 13px;
+}
+
+.ic-label {
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-size: 10px;
+  margin-right: 6px;
+  font-weight: 500;
+}
+
+.ic-team {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.ic-good  { color: var(--good); }
+.ic-warn  { color: var(--warn); }
+.ic-watch { color: #b06000; }
+.ic-muted { color: var(--muted); }
