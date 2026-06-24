@@ -230,16 +230,26 @@ html, body {
 
 /* ---------- Responsive heights ---------- */
 
+/* Row 1 hosts only the regression chart — give it a bit more vertical room
+   since it has 48 labelled bubbles and now owns the full width. */
+#chart-regression { /* no-op selector kept for clarity */ }
+.content-row .chart-card { height: clamp(420px, 50vh, 580px); }
+
 @media (max-width: 1200px) {
   .chart-card { height: clamp(340px, 42vh, 460px); }
+  .content-row .chart-card { height: clamp(380px, 46vh, 520px); }
+  .read-panel { height: clamp(340px, 42vh, 460px); }
 }
 @media (max-width: 992px) {
   .chart-card { height: 380px; }
-  .read-panel { margin-top: 12px; position: static !important; }
+  .content-row .chart-card { height: 420px; }
+  .read-panel { height: 380px; }
 }
 @media (max-width: 768px) {
   .app-shell { padding: 12px 14px 24px 14px; }
   .chart-card { height: 360px; }
+  .content-row .chart-card { height: 400px; }
+  .read-panel { height: auto; max-height: 480px; }
   .chart-title { font-size: 12px; }
   .chart-desc  { font-size: 10px; }
   .brand-title { font-size: 20px; }
@@ -260,8 +270,11 @@ html, body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-1);
-  padding: 20px;
-  height: 100%;
+  padding: 20px 22px;
+  height: clamp(360px, 44vh, 520px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .panel-eyebrow {

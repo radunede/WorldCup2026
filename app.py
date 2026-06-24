@@ -30,10 +30,34 @@ GOOGLE_FONT = (
 )
 
 
+def _chromium_available() -> bool:
+    """Quick precheck so the failure mode is fast and the log message is clear."""
+    try:
+        from pathlib import Path
+
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            exe = Path(p.chromium.executable_path)
+    except Exception:
+        log.warning("Playwright not importable; skipping startup scrape")
+        return False
+    if not exe.exists():
+        log.warning(
+            "Chromium binary missing at %s — skipping startup scrape. "
+            "On Render, set Build Command to "
+            "'pip install -r requirements.txt && python -m playwright install chromium'.",
+            exe,
+        )
+        return False
+    return True
+
+
 def _scrape_at_startup() -> None:
     """Try to refresh CSVs from FIFA. Never raise — the app must still boot."""
     if os.environ.get("SCRAPE_ON_STARTUP", "1") != "1":
         log.info("Startup scrape disabled (SCRAPE_ON_STARTUP=0)")
+        return
+    if not _chromium_available():
         return
     try:
         from scrape_team_stats import scrape

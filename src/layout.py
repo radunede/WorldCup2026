@@ -130,69 +130,68 @@ def make_layout(team_options: list[dict]) -> dbc.Container:
                 ],
             ),
 
-            # 2x2 charts + side panel
+            # Row 1: full-width regression chart
             dbc.Row(
                 className="content-row g-3",
-                children=[
-                    dbc.Col(
-                        children=[
-                            dbc.Row(
-                                className="g-3",
-                                children=[
-                                    dbc.Col(chart_card("chart-regression"), md=6),
-                                    dbc.Col(chart_card("chart-style"), md=6),
-                                ],
-                            ),
-                            dbc.Row(
-                                className="g-3 mt-1",
-                                children=[
-                                    dbc.Col(chart_card("chart-magic"), md=6),
-                                    dbc.Col(chart_card("chart-dna"), md=6),
-                                ],
-                            ),
-                            html.Div(id="regression-card", className="interp-card"),
-                        ],
-                        md=9,
-                    ),
+                children=[dbc.Col(chart_card("chart-regression"), md=12)],
+            ),
 
-                    dbc.Col(
-                        html.Div(
-                            className="read-panel",
-                            children=[
-                                html.Div("BETTING READ", className="panel-eyebrow"),
-                                html.H3(id="read-team", className="panel-team"),
-                                html.Div(id="read-tag", className="panel-tag"),
-                                html.Hr(className="panel-divider"),
-                                html.Div([
-                                    html.Div("Style", className="panel-key"),
-                                    html.Div(id="read-style", className="panel-val"),
-                                ], className="panel-row"),
-                                html.Div([
-                                    html.Div("Strength", className="panel-key"),
-                                    html.Div(id="read-strength", className="panel-val"),
-                                ], className="panel-row"),
-                                html.Div([
-                                    html.Div("Weakness", className="panel-key"),
-                                    html.Div(id="read-weakness", className="panel-val"),
-                                ], className="panel-row"),
-                                html.Div([
-                                    html.Div("Regression", className="panel-key"),
-                                    html.Div(id="read-regression", className="panel-val"),
-                                ], className="panel-row"),
-                                html.Div([
-                                    html.Div("Magic", className="panel-key"),
-                                    html.Div(id="read-magic", className="panel-val"),
-                                ], className="panel-row"),
-                                html.Hr(className="panel-divider"),
-                                html.Div(
-                                    "Analytics framing only — not a betting recommendation.",
-                                    className="panel-disclaimer",
-                                ),
-                            ],
-                        ),
-                        md=3,
-                    ),
+            # Row 2: style map + betting read panel
+            dbc.Row(
+                className="g-3 mt-1",
+                children=[
+                    dbc.Col(chart_card("chart-style"), md=6),
+                    dbc.Col(_read_panel(), md=6),
                 ],
+            ),
+
+            # Row 3: magic + DNA
+            dbc.Row(
+                className="g-3 mt-1",
+                children=[
+                    dbc.Col(chart_card("chart-magic"), md=6),
+                    dbc.Col(chart_card("chart-dna"), md=6),
+                ],
+            ),
+
+            # Regression interpretation card under the bottom row
+            html.Div(id="regression-card", className="interp-card"),
+        ],
+    )
+
+
+def _read_panel() -> html.Div:
+    return html.Div(
+        className="read-panel",
+        children=[
+            html.Div("BETTING READ", className="panel-eyebrow"),
+            html.H3(id="read-team", className="panel-team"),
+            html.Div(id="read-tag", className="panel-tag"),
+            html.Hr(className="panel-divider"),
+            html.Div([
+                html.Div("Style", className="panel-key"),
+                html.Div(id="read-style", className="panel-val"),
+            ], className="panel-row"),
+            html.Div([
+                html.Div("Strength", className="panel-key"),
+                html.Div(id="read-strength", className="panel-val"),
+            ], className="panel-row"),
+            html.Div([
+                html.Div("Weakness", className="panel-key"),
+                html.Div(id="read-weakness", className="panel-val"),
+            ], className="panel-row"),
+            html.Div([
+                html.Div("Regression", className="panel-key"),
+                html.Div(id="read-regression", className="panel-val"),
+            ], className="panel-row"),
+            html.Div([
+                html.Div("Magic", className="panel-key"),
+                html.Div(id="read-magic", className="panel-val"),
+            ], className="panel-row"),
+            html.Hr(className="panel-divider"),
+            html.Div(
+                "Analytics framing only — not a betting recommendation.",
+                className="panel-disclaimer",
             ),
         ],
     )

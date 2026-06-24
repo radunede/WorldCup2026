@@ -211,6 +211,66 @@ def goals_vs_attempts_persistent(df: pd.DataFrame, height: int = 460) -> tuple[g
     return fig, ols
 
 
+def highlight_team_in_regression(base_fig: go.Figure, df: pd.DataFrame,
+                                 team: str) -> go.Figure:
+    """Return a *copy* of the persistent regression figure with a red ring + arrow
+    pointing at the selected team. The cached base figure is never mutated."""
+    fig = go.Figure(base_fig)
+    row = df.loc[df["Team"] == team]
+    if row.empty:
+        return fig
+
+    idx = row.index[0]
+    x_val = pd.to_numeric(get(df, "attempts_at_goal").iloc[idx], errors="coerce")
+    y_val = pd.to_numeric(get(df, "goals").iloc[idx], errors="coerce")
+    if pd.isna(x_val) or pd.isna(y_val):
+        return fig
+    x_val = float(x_val)
+    y_val = float(y_val)
+
+    RED = "#d93025"
+
+    # Hollow red ring around the existing residual-colored bubble
+    fig.add_trace(go.Scatter(
+        x=[x_val], y=[y_val],
+        mode="markers",
+        marker=dict(
+            size=26,
+            color="rgba(0,0,0,0)",
+            line=dict(color=RED, width=3),
+            symbol="circle",
+        ),
+        hoverinfo="skip",
+        showlegend=False,
+        name="_selected_ring",
+    ))
+
+    # Smart offset for the arrow label so it doesn't fall off-axis
+    x_all = pd.to_numeric(get(df, "attempts_at_goal"), errors="coerce").dropna()
+    y_all = pd.to_numeric(get(df, "goals"), errors="coerce").dropna()
+    x_mid = float((x_all.max() + x_all.min()) / 2)
+    y_mid = float((y_all.max() + y_all.min()) / 2)
+    ax_off = -70 if x_val > x_mid else 70
+    ay_off = 60 if y_val > y_mid else -60
+
+    fig.add_annotation(
+        x=x_val, y=y_val,
+        text=f"<b>{team}</b>",
+        showarrow=True,
+        arrowhead=3,
+        arrowsize=1.4,
+        arrowwidth=2.5,
+        arrowcolor=RED,
+        ax=ax_off, ay=ay_off,
+        font=dict(size=12, color=RED, family=FONT),
+        bgcolor="rgba(255,255,255,0.97)",
+        bordercolor=RED,
+        borderwidth=1.5,
+        borderpad=4,
+    )
+    return fig
+
+
 # ---------------------------------------------------------------------------
 # Chart 2 — Style Map (Verticality × Pressing)
 # ---------------------------------------------------------------------------

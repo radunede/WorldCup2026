@@ -6,7 +6,12 @@ from __future__ import annotations
 import pandas as pd
 from dash import Input, Output, html
 
-from .charts import magic_factor_bar, style_map, team_dna
+from .charts import (
+    highlight_team_in_regression,
+    magic_factor_bar,
+    style_map,
+    team_dna,
+)
 from .data_loader import get
 from .features import DNA_FIELDS, percentile_rank
 from .store import DataStore
@@ -95,8 +100,8 @@ def register_callbacks(app, store: DataStore) -> None:
     def update(team):
         snap = store.snapshot
         df = snap.df
-        regression_fig = snap.regression_fig
         ols = snap.ols
+        regression_fig = highlight_team_in_regression(snap.regression_fig, df, team)
 
         row = df.loc[df["Team"] == team]
         if row.empty:
@@ -185,7 +190,7 @@ def register_callbacks(app, store: DataStore) -> None:
         return (
             kpi_goals, kpi_xg, kpi_attempts, kpi_conv,
             kpi_mfi_rank, kpi_magic_rank,
-            regression_fig,           # persistent — never changes
+            regression_fig,           # persistent base + red highlight for `team`
             fig_style, fig_magic, fig_dna,
             regression_card,
             team, tag, tag_class,

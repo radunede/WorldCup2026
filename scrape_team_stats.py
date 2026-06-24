@@ -39,20 +39,26 @@ TABS = [
 
 
 def _dismiss_cookies(page) -> None:
-    for selector in (
-        "#onetrust-accept-btn-handler",
-        "button:has-text('Accept All')",
-        "button:has-text('Accept all')",
-        "button:has-text('I Accept')",
-    ):
-        try:
-            btn = page.locator(selector).first
-            if btn.is_visible(timeout=1500):
-                btn.click()
-                page.wait_for_timeout(500)
-                return
-        except Exception:
-            pass
+    # FIFA uses OneTrust. The accept button has a stable id; clicking it via
+    # JS avoids the timing race where Playwright's is_visible() returns before
+    # the OneTrust SDK finishes mounting.
+    try:
+        page.wait_for_selector("#onetrust-accept-btn-handler",
+                               state="attached", timeout=8000)
+    except PlaywrightTimeout:
+        return  # no banner appeared; nothing to dismiss
+
+    page.evaluate(
+        "() => document.getElementById('onetrust-accept-btn-handler')?.click()"
+    )
+    page.wait_for_timeout(800)
+
+    # Wait for the dark overlay to actually disappear before continuing.
+    try:
+        page.wait_for_selector(".onetrust-pc-dark-filter",
+                               state="hidden", timeout=4000)
+    except PlaywrightTimeout:
+        pass
 
 
 def _extract_largest_table(page) -> list[list[str]]:
@@ -89,7 +95,11 @@ def _table_signature(table: list[list[str]]) -> str:
 
 
 def _click_tab(page, tab_name: str) -> bool:
+    # The FIFA team-stats page now renders tabs as <button class="filter-chip">.
+    # We keep the older selectors as fallbacks in case the markup changes again.
     for sel in (
+        f"button.filter-chip:has-text('{tab_name}')",
+        f"button.filter-chip >> text='{tab_name}'",
         f"button:has-text('{tab_name}')",
         f"a:has-text('{tab_name}')",
         f"[role='tab']:has-text('{tab_name}')",
@@ -127,7 +137,14 @@ def _scrape_all_tabs() -> dict[str, list[list[str]]]:
         page = context.new_page()
         page.goto(URL, wait_until="domcontentloaded", timeout=60000)
         _dismiss_cookies(page)
-        page.wait_for_selector("table", timeout=60000)
+
+        # Wait for either the data table or the tab chips. The tab chips render
+        # even when FIFA's data table is empty, so falling back to them lets
+        # us at least click through each tab and detect "no data yet".
+        try:
+            page.wait_for_selector("table, button.filter-chip", timeout=60000)
+        except PlaywrightTimeout:
+            print("! page did not render data or tab chips within 60s", flush=True)
         page.mouse.wheel(0, 600)
         page.wait_for_timeout(800)
 
