@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 from .data_loader import get
 from .features import DNA_FIELDS, percentile_rank
 from .models import OLSResult, fit_ols_regression
+from .tournament import ELIMINATED
 
 
 # ---------------------------------------------------------------------------
@@ -139,18 +140,22 @@ def goals_vs_attempts_persistent(df: pd.DataFrame, height: int = 460) -> tuple[g
     xg_max = float(np.max(xg_arr)) or 1.0
     sref = 2.0 * xg_max / (55.0 ** 2)
 
+    alive_mask = np.array([t not in ELIMINATED for t in teams])
+    alive_idx = np.where(alive_mask)[0]
+    elim_idx = np.where(~alive_mask)[0]
+
     fig.add_trace(go.Scatter(
-        x=x_jit, y=y_arr,
+        x=x_jit[alive_idx], y=y_arr[alive_idx],
         mode="markers+text",
-        text=teams,
+        text=[teams[i] for i in alive_idx],
         textposition="top center",
         textfont=dict(size=9, color=TEXT, family=FONT),
         marker=dict(
-            size=xg_arr,
+            size=xg_arr[alive_idx],
             sizemode="area",
             sizeref=sref,
             sizemin=6,
-            color=residuals,
+            color=residuals[alive_idx],
             colorscale="RdYlGn",
             cmin=-res_abs_max,
             cmax=res_abs_max,
@@ -163,7 +168,7 @@ def goals_vs_attempts_persistent(df: pd.DataFrame, height: int = 460) -> tuple[g
                 outlinewidth=0,
             ),
         ),
-        customdata=np.stack([xg_arr, residuals], axis=-1),
+        customdata=np.stack([xg_arr[alive_idx], residuals[alive_idx]], axis=-1),
         hovertemplate=(
             "<b>%{text}</b><br>"
             "Attempts: %{x:.0f}<br>"
@@ -171,24 +176,55 @@ def goals_vs_attempts_persistent(df: pd.DataFrame, height: int = 460) -> tuple[g
             "xG: %{customdata[0]:.2f}<br>"
             "Residual: %{customdata[1]:+.2f}<extra></extra>"
         ),
-        name="Teams",
+        name="Still alive",
         showlegend=False,
     ))
 
-    # Callouts: 3 biggest over- and under-performers
-    order = np.argsort(residuals)
-    callouts = list(order[-3:][::-1]) + list(order[:3])
-    for i in callouts:
-        fig.add_annotation(
-            x=x_arr[i], y=y_arr[i],
-            text=f"<b>{teams[i]}</b>",
-            showarrow=True, arrowhead=2, arrowsize=1, arrowwidth=1,
-            arrowcolor=MUTED,
-            ax=0, ay=-26 if residuals[i] > 0 else 26,
-            font=dict(size=10, color=TEXT, family=FONT),
-            bgcolor="rgba(255,255,255,0.92)",
-            bordercolor=GRID, borderwidth=1, borderpad=3,
-        )
+    if len(elim_idx) > 0:
+        fig.add_trace(go.Scatter(
+            x=x_jit[elim_idx], y=y_arr[elim_idx],
+            mode="markers+text",
+            text=[teams[i] for i in elim_idx],
+            textposition="top center",
+            textfont=dict(size=9, color="#bdc1c6", family=FONT),
+            marker=dict(
+                size=xg_arr[elim_idx],
+                sizemode="area",
+                sizeref=sref,
+                sizemin=6,
+                color="#9aa0a6",
+                opacity=0.28,
+                line=dict(width=1, color="white"),
+            ),
+            customdata=np.stack([xg_arr[elim_idx], residuals[elim_idx]], axis=-1),
+            hovertemplate=(
+                "<b>%{text} — eliminated</b><br>"
+                "Attempts: %{x:.0f}<br>"
+                "Goals: %{y:.0f}<br>"
+                "xG: %{customdata[0]:.2f}<br>"
+                "Residual: %{customdata[1]:+.2f}<extra></extra>"
+            ),
+            name="Eliminated",
+            showlegend=False,
+        ))
+
+    # Callouts: 3 biggest over- and under-performers among alive teams
+    if len(alive_idx) >= 2:
+        alive_res = residuals[alive_idx]
+        order_local = np.argsort(alive_res)
+        picks_local = list(order_local[-3:][::-1]) + list(order_local[:3])
+        for j in picks_local:
+            i = int(alive_idx[j])
+            fig.add_annotation(
+                x=x_arr[i], y=y_arr[i],
+                text=f"<b>{teams[i]}</b>",
+                showarrow=True, arrowhead=2, arrowsize=1, arrowwidth=1,
+                arrowcolor=MUTED,
+                ax=0, ay=-26 if residuals[i] > 0 else 26,
+                font=dict(size=10, color=TEXT, family=FONT),
+                bgcolor="rgba(255,255,255,0.92)",
+                bordercolor=GRID, borderwidth=1, borderpad=3,
+            )
 
     _base_layout(fig, "Goals vs Attempts At Goal — bubble = xG", height=height)
     fig.update_xaxes(title="Attempts At Goal")
